@@ -10,8 +10,11 @@ public class StringLongestPalindrome {
     /**
      *  回文数问题
      *  给定的一个定长的字符串来 ，返回字符串A中最长回文串的长度
+     *  O(n^2)时间复杂度方法——从中心向外扩散
      */
+public String  getlongstPalindrome(String A){
 
+    return "";}
 
     public int getLongestPalindrome(String A){
         char[] arrayA = A.toCharArray();
@@ -41,11 +44,15 @@ public class StringLongestPalindrome {
     }
 
     public static void main(String[] args){
+        long startTime = System.currentTimeMillis();//获取当前时间
+        //doSomeThing();   //要运行的java程序
         StringLongestPalindrome test = new StringLongestPalindrome();
         Scanner in = new Scanner(System.in);
         System.out.println("请输入一个字符串：");
         String A = in.nextLine();
         int maxA = test.getLongestPalindrome(A);
         System.out.println("输入目标字符串中最长回文串的长度为："+maxA);
+        long endTime = System.currentTimeMillis();
+        System.out.println("程序运行时间："+(endTime-startTime)+"ms");
     }
 }
