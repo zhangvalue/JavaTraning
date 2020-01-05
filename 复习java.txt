@@ -1,0 +1,178 @@
+java.awt是一个软件包，包含用于创建用户界面和绘制图形图像的所有分类。
+
+Java的核心库java.io提供了全面的IO接口。包括：文件读写、标准设备输出等。Java中IO是以流为基础进行输入输出的，所有数据被串行化写入输出流，或者从输入流读入。
+
+java.lang是提供利用 Java 编程语言进行程序设计的基础类。最重要的类是Object（它是类层次结构的根）和 Class（它的实例表示正在运行的应用程序中的类）。
+
+java.util包含集合框架、遗留的 collection 类、事件模型、日期和时间设施、国际化和各种实用工具类（字符串标记生成器、随机数生成器和位数组、日期Date类、堆栈Stack类、向量Vector类等）。集合类、时间处理模式、日期时间工具等各类常用工具包
+
+ java.sql提供使用 JavaTM 编程语言访问并处理存储在数据源（通常是一个关系数据库）中的数据的 API
+
+
+
+在Java语言的异常处理中，finally块的作用就是为了保证无论出现什么情况，finally块里的代码一定会执行。
+由于程序执行return就意味着结束了对当前函数的调用并跳出这个函数体，因此任何语句执行都要放在return前执行（除非碰到exit函数），因此finally块里面的函数也是在return前执行的。
+如果try-finally或者catch-finally中都有return语句，那么finally中的return语句会覆盖别处的，最终返回到调用者那里的是finally中的return值。
+
+题目:在类设计中，类的成员变量要求仅仅能够被同一package下的类访问
+答案: 无修饰符 
+Java访问机制 权限大小
+protected仅限子类可访问， 不限包、类 protected一个特点是只要子类都能访问，不管在不在一个包。
+public最广
+private仅限声明的类中使 用
+无修饰符则仅限本包中使 用
+从大到小:public、protected、default、private
+
+题目:
+public class Test{
+    private static int i=1;
+    public int getNext(){
+         return i++;
+    }
+    public static void main(String [] args){
+        Test test=new Test();
+        Test testObject=new Test();
+        test.getNext();
+        testObject.getNext();
+        System.out.println(testObject.getNext());
+    }
+}
+答案:打印出来的是 3
+解析:
+该题主要考察的是static属性和i++操作。
+因为i是static的，是类属性，所以不管有多少对象，都共用的一个变量。
+return i++, 先返回i，然后i+1；
+第一次调用getNext()方法时，返回的是1，但此时i=2；
+第二次调用 getNext()方法时，返回的是2，但此时i=3；
+第三次调用 getNext()方法时，返回的是3，但此时i=4；
+
+Java中
+List和Set的区别，set中不能放重复的
+Set中重复的定义，未定义自己的equels方法的话，调用默认的，也就是直接==
+HashSet不能添加重复的元素，当调用add（Object）方法时候，
+首先会调用Object的hashCode方法判hashCode是否已经存在，如不存在则直接插入元素；
+如果已存在则调用Object对象的equals方法判断是否返回true， 如果为true则说明元素已经存在，如为false则插入元素
+
+
+题目:对于一个已经不被任何变量引用的对象，当垃圾回收器准备回收该对象所占用的内存时，将自动调用该对象的哪个方法（）finalize()方法
+
+就在移除一个对象并回收它的内存空间之前，Java垃圾回收器将会调用各个实例的finalize()方法，这样实例对象就有机会可以释放掉它占用的资源。尽管finalize()方法是保证在回收内存空间之前执行的，但是对具体的执行时间和执行顺序是没有任何保证的。多个实例之间的finalize()执行顺序是不能提前预知的，甚至有可能它们是并行执行的。程序不应该预先假设实例执行finalize()的方法，也不应该使用finalize()方法来回收资源。
+
+在finalize过程中抛出的任何异常都默认被忽略掉了，同时对象的销毁过程被取消
+JVM规范并没有讨论关于弱引用的垃圾回收，这是明确声明的。具体的细节留给实现者决定。
+垃圾回收是由守护进程执行的
+这个主要考察答题者是否了解 GC对不可用对象的判断过程，大家不要只是去了解finalize()方法，这样容易感到迷惑，如果这个题答不上来，最好还是去了解一下GC对哪些内存进行了回收以及对不可用对象的判断。
+
+下面是 “ GC对哪些内存进行了回收 ” 的一个简单的回答：
+
+gc是对不可用的对象进行回收，判断一个对象是否不可用采用的是可达性分析算法，具体的做法就是：从“GC Roots”开始，向下搜索，如果从GC Roots到某个对象不可达，那么这个对象就是不可用的，会被判定为是可回收的对象。
+
+不过这些对象也不是立即就会被回收，真正宣告一个对象死亡需要至少经历两次标记过程。
+
+在通过可达性分析后发现某个对象没有和GC Roots相连接的引用链，那么这个对象会被第一次标记并且进行一次筛选。
+筛选的条件是：该对象是否需要执行finalize()方法
+如果该对象没有覆盖finalize()方法 or finalize()方法已被虚拟机调用过，则无需执行finalize()方法。
+否则，需要执行finalize()方法
+在执行finalize()方法中该对象可以进行自救，即尝试将自己与引用链上任何一个对象建立关联（比如将自己赋值给某个类变量 or 对象的成员变量）
+如果自救成功，在第二次标记时，该对象将从“即将回收”的集合中被移出。
+如果自救失败，那么基本上这个对象就会真的被回收。
+在Java虚拟机的垃圾回收器看来，堆区中的每个对象都可能处于以下三个状态之一。
+ 可触及状态：当一个对象（假定为Sample对象）被创建后，只要程序中还有引用变量引用它，那么它就始终处于可触及状态。
+ 可复活状态：当程序不再有任何引用变量引用Sample对象时，它就进入可复活状态。在这个状态中，垃圾回收器会准备释放它占用的内存，在释放之前，会调用它及其他处于可复活状态的对象的finalize()方法，这些finalize()方法有可能使Sample 对象重新转到可触及状态。
+ 不可触及状态：当Java虚拟机执行完所有可复活对象的finalize()方法后，假如这些方法都没有使Sample对象转到可触及状态，那么Sample对象就进入不可触及状态。只有当对象处于不可触及状态时，垃圾回收器才会真正回收它占用的内存。
+
+notify唤醒线程，与wait()和同步锁synchronized()方法配合使用
+
+
+equals没重写时候和==一样，比较的是对象的地址，题中new 了两个对象，所以各自地址不一样，使用equals比较为false，但是string类型中的equals方法Java默认重写了，可以比较对象里的值；两个对象指向的同一个string成员变量里的值相同，所以eqauals比较也相同。
+public boolean equals(Object obj) {
+        return (this == obj);
+    }
+
+Object 中euqals的源码如上。没有重写equals时，是直接用==判断的，而String中重写了equals方法。
+
+
+题目：如果有n个节点用二叉树来存储，那么二叉树的最小深度为() 
+
+n节点的二叉树，既然深度最小，那么就应该是完全二叉树了；
+完全二叉树的高度计算节点和高度的关系是2^n-1;
+反转过来通过节点求高度，那么就是log2(n+1)了。
+另外自己用实际数算也可以，三个节点的完全二叉树高度是2。。
+遥想当年计算选择题的方法。。答案往里代数。
+
+sql语句本质上就好比一个java文件，都是要经历先解析编译后，处理优化，最后执行返回结果 的过程
+数据库sql语句执行过程
+解析--绑定--执行--提取
+
+
+
+preparedStatement和statement的区别
+1 、 PreparedStatement 接口继承 Statement ， PreparedStatement 实例包含已编译的 SQL 语句，所以其执行速度要快于 Statement 对象。
+2 、作为 Statement 的子类， PreparedStatement 继承了 Statement 的所有功能。三种方法
+      execute 、 executeQuery 和 executeUpdate 已被更改以使之不再需要参数
+3 、在 JDBC 应用中 , 如果你已经是稍有水平开发者 , 你就应该始终以 PreparedStatement 代替
+      Statement. 也就是说 , 在任何时候都不要使用 Statement.
+
+因为PreparedStatement有预编译的过程，所以第一次扫描的集合 
+PreparedStatement会大于等于 Statement
+
+基于以下的原因 :
+
+一 . 代码的可读性和可维护性 .
+
+虽然用 PreparedStatement 来代替 Statement 会使代码多出几行 , 但这样的代码无论从可读性还是可维护性上来说 . 都比直接用 Statement 的代码高很多档次 :
+
+stmt.executeUpdate("insert into tb_name (col1,col2,col2,col4) values ('"+var1+"','"+var2+"',"+var3+",'"+var4+"')");//stmt 是 Statement 对象实例
+perstmt = con.prepareStatement("insert into tb_name (col1,col2,col2,col4) values (?,?,?,?)");
+perstmt.setString(1,var1);
+perstmt.setString(2,var2);
+perstmt.setString(3,var3);
+perstmt.setString(4,var4);
+perstmt.executeUpdate(); //prestmt 是 PreparedStatement 对象实例
+
+不用我多说 , 对于第一种方法 . 别说其他人去读你的代码 , 就是你自己过一段时间再去读 , 都会觉得伤心 .
+
+PreparedStatement 尽最大可能提高性能 .
+    语句在被 DB 的编译器编译后的执行代码被缓存下来 , 那么下次调用时只要是相同的预编译语句就不需要编译 , 只要将参数直接传入编译过的语句执行代码中 ( 相当于一个涵数 ) 就会得到执行 . 这并不是说只有一个 Connection 中多次执行的预编译语句被缓存 , 而是对于整个 DB 中 , 只要预编译的语句语法和缓存中匹配 . 那么在任何时候就可以不需要再次编译而可以直接执行 . 而 statement 的语句中 , 即使是相同一操作 , 而由于每次操作的数据不同所以使整个语句相匹配的机会极小 , 几乎不太可能匹配 . 比如 :
+insert into tb_name (col1,col2) values ('11','22');
+insert into tb_name (col1,col2) values ('11','23');
+即使是相同操作但因为数据内容不一样 , 所以整个个语句本身不能匹配 , 没有缓存语句的意义 . 事实是没有数据库会对普通语句编译后的执行代码缓存 .
+
+当然并不是所以预编译语句都一定会被缓存 , 数据库本身会用一种策略 , 比如使用频度等因素来决定什么时候不再缓存已有的预编译结果 . 以保存有更多的空间存储新的预编译语句 .
+
+ 
+
+三 . 最重要的一点是极大地提高了安全性 .
+即使到目前为止 , 仍有一些人连基本的恶义 SQL 语法都不知道 .
+String sql = "select * from tb_name where name= '"+varname+"' and passwd='"+varpasswd+"'";
+如果我们把 [' or '1' = '1] 作为 varpasswd 传入进来 . 用户名随意 , 看看会成为什么 ?
+
+select * from tb_name = ' 随意 ' and passwd = '' or '1' = '1';
+
+因为 '1'='1' 肯定成立 , 所以可以任何通过验证 . 更有甚者 :
+
+把 [';drop table tb_name;] 作为 varpasswd 传入进来 , 则 :
+
+select * from tb_name = ' 随意 ' and passwd = '';drop table tb_name; 有些数据库是不会让你成功的 , 但也有很多数据库就可以使这些语句得到执行 .
+而如果你使用预编译语句 . 你传入的任何内容就不会和原来的语句发生任何匹配的关系 . 只要全使用预编译语句 , 你就用不着对传入的数据做任何过虑 . 而如果使用普通的 statement, 有可能要对 drop,; 等做费尽心机的判断和过虑 .
+
+java中final和finally
+final关键字可以用于类，方法，变量前，用来表示该关键字修饰的类，方法，变量具有不可变的特性。
+（1）final关键字用于基本数据类型前：这时表明该关键字修饰的变量是一个常量，在定义后该变量的值就不能被修改。
+（2）final关键字用于方法声明前：这时意味着该方法时最终方法，只能被调用，不能被覆盖，但是可以被重载。
+（3）final关键字用于类名前：此时该类被称为最终类，该类不能被其他类继承。
+
+finally：当代码抛出一个异常时，就会终止方法中剩余代码的处理，并退出这个方法的执行。假如我们打开了一个文件，但在处理文件过程中发生异常，这时文件还没有被关闭，此时就会产生资源回收问题。对此，java提供了一种好的解决方案，那就是finally子句，finally子句中的语句是一定会被执行的，所以我们只要把前面说的文件关闭的语句放在finally子句中无论在读写文件中是否遇到异常退出，文件关闭语句都会执行，保证了资源的合理回收。
+
+finalize
+finalize方法来自于java.lang.Object，用于回收资源。
+可以为任何一个类添加finalize方法。finalize方法将在垃圾回收器清除对象之前调用。
+在实际应用中，不要依赖使用该方法回收任何短缺的资源，这是因为很难知道这个方法什么时候被调用。
+
+
+Java中的只有值传递参数,当一个对象实例作为一个参数被传递到方法时,参数的值就是该对象的应用,对象的内容可以再被调用的方法中改变,单对象的引用是永远不会改变的.
+
+
+Java中的静态static内部类,可以不依赖于外部类实例被实例化,而通常的内部类需要在外部类实例化之后才能被实例化.
+
+
